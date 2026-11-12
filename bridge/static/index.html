@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spacebring Lab Instrument Bridge</title>
+  <style>
+    :root {
+      --bg-primary: #0f172a;
+      --bg-surface: #1e293b;
+      --bg-card: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #38bdf8;
+      --primary-hover: #0ea5e9;
+      --accent: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --border: #475569;
+      --border-light: rgba(255, 255, 255, 0.1);
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      line-height: 1.5;
+      font-size: 14px;
+      padding-bottom: 50px;
+    }
+
+    header {
+      background-color: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      background: linear-gradient(135deg, #0284c7, #10b981);
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 18px;
+      color: #fff;
+    }
+
+    .brand h1 { font-size: 18px; font-weight: 700; color: #fff; }
+    .brand span { font-size: 12px; color: var(--primary); display: block; font-weight: 500; }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .btn {
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-primary { background: var(--primary); color: #0f172a; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-secondary { background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: #475569; }
+    .btn-success { background: var(--accent); color: #0f172a; }
+    .btn-success:hover { opacity: 0.9; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-sm { padding: 4px 8px; font-size: 12px; }
+
+    nav {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 28px;
+      display: flex;
+      gap: 24px;
+    }
+
+    .nav-tab {
+      padding: 12px 4px;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-weight: 600;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .nav-tab:hover { color: var(--text-main); }
+    .nav-tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    main {
+      max-width: 1300px;
+      margin: 24px auto;
+      padding: 0 20px;
+    }
+
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px;
+    }
+
+    .stat-title { font-size: 12px; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+    .stat-value { font-size: 26px; font-weight: 700; color: #fff; }
+    .stat-sub { font-size: 12px; color: var(--accent); margin-top: 4px; }
+
+    .card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border-light);
+      padding-bottom: 12px;
+    }
+
+    .card-title { font-size: 16px; font-weight: 700; color: #fff; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th {
+      background: #0f172a;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 12px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border-light);
+      color: var(--text-main);
+    }
+
+    tr:hover td { background: rgba(255, 255, 255, 0.02); }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: capitalize;
+    }
+
+    .badge-success { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+    .badge-warning { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+    .badge-danger { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+    .badge-info { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); }
+    .badge-neutral { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.4); }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      visibility: hidden;
+      opacity: 0;
+      transition: all 0.2s;
+    }
+
+    .modal-overlay.active {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .modal {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      width: 90%;
+      max-width: 550px;
+      padding: 24px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .modal-title { font-size: 16px; font-weight: 700; }
+    .modal-close { cursor: pointer; color: var(--text-muted); font-size: 20px; font-weight: bold; }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 8px 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: #fff;
+      font-size: 13px;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .alert {
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      margin-bottom: 14px;
+      display: none;
+    }
+
+    .alert-error { background: rgba(239, 68, 68, 0.2); border: 1px solid var(--danger); color: #fca5a5; }
+    .alert-success { background: rgba(16, 185, 129, 0.2); border: 1px solid var(--accent); color: #6ee7b7; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="brand-logo">SB</div>
+      <div>
+        <h1>Spacebring Lab Instrument Bridge</h1>
+        <span>Coworking CRM + Lab Core Facility Operating System</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-secondary" onclick="seedSampleData()">🧪 Load Demo Data</button>
+      <button class="btn btn-primary" onclick="openReservationModal()">+ New Booking</button>
+      <button class="btn btn-success" onclick="exportBillingCsv()">📥 Export Spacebring CSV</button>
+    </div>
+  </header>
+
+  <nav>
+    <div class="nav-tab active" onclick="switchTab('dashboard')">Overview</div>
+    <div class="nav-tab" onclick="switchTab('spacebring')">Spacebring Roster</div>
+    <div class="nav-tab" onclick="switchTab('instruments')">Lab Instruments</div>
+    <div class="nav-tab" onclick="switchTab('qualifications')">Training Matrix</div>
+    <div class="nav-tab" onclick="switchTab('reservations')">Bookings & Usage</div>
+    <div class="nav-tab" onclick="switchTab('billing')">Billing Reconciliation</div>
+    <div class="nav-tab" onclick="switchTab('importer')">Data Ingestion</div>
+  </nav>
+
+  <main>
+    <!-- TAB 1: DASHBOARD -->
+    <div id="tab-dashboard" class="tab-pane active">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-title">Spacebring Companies</div>
+          <div class="stat-value" id="stat-companies">-</div>
+          <div class="stat-sub" id="stat-members">- active members</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Scientific Instruments</div>
+          <div class="stat-value" id="stat-instruments">-</div>
+          <div class="stat-sub">Across all lab suites</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Active Certifications</div>
+          <div class="stat-value" id="stat-quals">-</div>
+          <div class="stat-sub">Verified operators</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Unbilled Lab Revenue</div>
+          <div class="stat-value" id="stat-unbilled-rev">$0.00</div>
+          <div class="stat-sub" id="stat-unbilled-hours">0.00 billable hours</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Recent Instrument Reservations & Live Sessions</div>
+          <button class="btn btn-secondary btn-sm" onclick="loadDashboard()">Refresh</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Instrument</th>
+              <th>Member (Operator)</th>
+              <th>Spacebring Company</th>
+              <th>Scheduled Time</th>
+              <th>Duration</th>
+              <th>Status</th>
+              <th>Estimated Cost</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="dashboard-reservations-table">
+            <tr><td colspan="8" style="text-align:center;">Loading reservations...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 2: SPACEBRING ROSTER -->
+    <div id="tab-spacebring" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Spacebring Tenant Companies</div>
+          <button class="btn btn-secondary btn-sm" onclick="loadSpacebringData()">Refresh</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Company Name</th>
+              <th>Membership Tier / Suite</th>
+              <th>Account Status</th>
+              <th>Billing Contact</th>
+              <th>Enrolled Lab Members</th>
+            </tr>
+          </thead>
+          <tbody id="spacebring-companies-table"></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Spacebring Members (Lab Operators)</div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Full Name</th>
+              <th>Company</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="spacebring-members-table"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 3: INSTRUMENTS -->
+    <div id="tab-instruments" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Lab Instrument Registry</div>
+          <button class="btn btn-primary btn-sm" onclick="openInstrumentModal()">+ Add Instrument</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Instrument Name</th>
+              <th>Category</th>
+              <th>Location</th>
+              <th>Hourly Rate</th>
+              <th>Requires Training</th>
+              <th>Min Cert Level</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="instruments-table"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 4: QUALIFICATIONS -->
+    <div id="tab-qualifications" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Training Certifications & Operator Matrix</div>
+          <button class="btn btn-primary btn-sm" onclick="openQualificationModal()">+ Grant Certification</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Member Name</th>
+              <th>Spacebring Company</th>
+              <th>Certified Instrument</th>
+              <th>Training Level</th>
+              <th>Certified Date</th>
+              <th>Expires Date</th>
+              <th>Certified By</th>
+            </tr>
+          </thead>
+          <tbody id="qualifications-table"></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">⚡ Instant Eligibility Verification Tool</div>
+        </div>
+        <div style="display: flex; gap: 12px; align-items: flex-end;">
+          <div class="form-group" style="flex: 1;">
+            <label>Select Spacebring Member</label>
+            <select id="verify-member-select" class="form-control"></select>
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label>Select Lab Instrument</label>
+            <select id="verify-instrument-select" class="form-control"></select>
+          </div>
+          <div class="form-group">
+            <button class="btn btn-primary" onclick="verifyEligibility()">Verify Access</button>
+          </div>
+        </div>
+        <div id="verify-result" style="margin-top: 10px; display: none; padding: 12px; border-radius: 6px;"></div>
+      </div>
+    </div>
+
+    <!-- TAB 5: RESERVATIONS -->
+    <div id="tab-reservations" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Instrument Reservations & Usage History</div>
+          <button class="btn btn-primary btn-sm" onclick="openReservationModal()">+ New Booking</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Instrument</th>
+              <th>Member</th>
+              <th>Company</th>
+              <th>Start Time</th>
+              <th>End Time</th>
+              <th>Hours</th>
+              <th>Cost</th>
+              <th>Status</th>
+              <th>Billed</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="all-reservations-table"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 6: BILLING -->
+    <div id="tab-billing" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Unbilled Usage Summary by Spacebring Tenant</div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-success btn-sm" onclick="exportBillingCsv()">Export Spacebring CSV</button>
+            <button class="btn btn-secondary btn-sm" onclick="loadBillingSummary()">Refresh</button>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Spacebring Company</th>
+              <th>Membership Tier</th>
+              <th>Billing Contact</th>
+              <th>Completed Sessions</th>
+              <th>Total Hours</th>
+              <th>Unbilled Total</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="billing-summary-table"></tbody>
+        </table>
+      </div>
+
+      <div class="card" id="ledger-card" style="display: none;">
+        <div class="card-header">
+          <div class="card-title" id="ledger-title">Itemized Company Ledger</div>
+          <button class="btn btn-secondary btn-sm" onclick="closeLedger()">Close</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Instrument</th>
+              <th>Operator</th>
+              <th>Hours</th>
+              <th>Rate ($/hr)</th>
+              <th>Total Cost</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody id="ledger-items-table"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 7: IMPORTER -->
+    <div id="tab-importer" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Local Machine Data Ingestion</div>
+        </div>
+        <p style="color: var(--text-muted); margin-bottom: 16px;">
+          Synchronize your tenant roster from Spacebring by pointing to individual export files (.csv, .json, .tsv) or scanning an entire local directory containing customer data.
+        </p>
+
+        <div style="background: var(--bg-card); padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+          <h4 style="margin-bottom: 8px;">Option 1: Ingest Local Folder</h4>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">Scans all CSV and JSON files in the specified folder and merges members, companies, and accounts.</p>
+          <div style="display: flex; gap: 10px;">
+            <input type="text" id="import-folder-input" class="form-control" placeholder="C:\Users\marez\Downloads\spacebring_exports">
+            <button class="btn btn-primary" onclick="importFolder()">Scan & Sync Folder</button>
+          </div>
+        </div>
+
+        <div style="background: var(--bg-card); padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+          <h4 style="margin-bottom: 8px;">Option 2: Ingest Single Export File</h4>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">Enter the absolute path to a single Spacebring export file.</p>
+          <div style="display: flex; gap: 10px;">
+            <input type="text" id="import-file-input" class="form-control" placeholder="C:\Users\marez\Downloads\members_export.csv">
+            <button class="btn btn-secondary" onclick="importFile()">Ingest File</button>
+          </div>
+        </div>
+
+        <div id="import-status-box" style="display: none; padding: 12px; border-radius: 6px; margin-top: 16px;"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL: NEW RESERVATION -->
+  <div id="reservation-modal" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Book Lab Instrument</div>
+        <div class="modal-close" onclick="closeModal('reservation-modal')">&times;</div>
+      </div>
+      <div id="booking-alert" class="alert alert-error"></div>
+      <form onsubmit="handleCreateReservation(event)">
+        <div class="form-group">
+          <label>Lab Instrument</label>
+          <select id="modal-inst-select" class="form-control" required onchange="checkModalEligibility()"></select>
+        </div>
+        <div class="form-group">
+          <label>Spacebring Member (Operator)</label>
+          <select id="modal-mem-select" class="form-control" required onchange="checkModalEligibility()"></select>
+        </div>
+        <div id="modal-eligibility-hint" style="font-size: 12px; margin-bottom: 10px; color: var(--primary);"></div>
+        <div style="display: flex; gap: 10px;">
+          <div class="form-group" style="flex: 1;">
+            <label>Start Time</label>
+            <input type="datetime-local" id="modal-start-time" class="form-control" required>
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label>End Time</label>
+            <input type="datetime-local" id="modal-end-time" class="form-control" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Project / Experiment Notes</label>
+          <input type="text" id="modal-booking-notes" class="form-control" placeholder="e.g. Assay validation, cell sorting">
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('reservation-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-submit-booking">Confirm Booking</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD INSTRUMENT -->
+  <div id="instrument-modal" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Register Lab Instrument</div>
+        <div class="modal-close" onclick="closeModal('instrument-modal')">&times;</div>
+      </div>
+      <form onsubmit="handleCreateInstrument(event)">
+        <div class="form-group">
+          <label>Instrument Name</label>
+          <input type="text" id="modal-new-inst-name" class="form-control" required placeholder="e.g. BD Accuri C6 Plus">
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <div class="form-group" style="flex: 1;">
+            <label>Category</label>
+            <input type="text" id="modal-new-inst-category" class="form-control" required placeholder="Cytometry, Imaging, etc.">
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label>Hourly Rate ($/hr)</label>
+            <input type="number" step="0.01" id="modal-new-inst-rate" class="form-control" required value="50.00">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Location / Room</label>
+          <input type="text" id="modal-new-inst-loc" class="form-control" placeholder="Room 204 Bay B">
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <div class="form-group" style="flex: 1;">
+            <label>Minimum Training Level</label>
+            <select id="modal-new-inst-training" class="form-control">
+              <option value="None">None</option>
+              <option value="Basic" selected>Basic</option>
+              <option value="Advanced">Advanced</option>
+              <option value="Certified Operator">Certified Operator</option>
+            </select>
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label>Model / Serial</label>
+            <input type="text" id="modal-new-inst-model" class="form-control" placeholder="SN-12345">
+          </div>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('instrument-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Instrument</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: GRANT QUALIFICATION -->
+  <div id="qualification-modal" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Grant Operator Certification</div>
+        <div class="modal-close" onclick="closeModal('qualification-modal')">&times;</div>
+      </div>
+      <form onsubmit="handleGrantCertification(event)">
+        <div class="form-group">
+          <label>Spacebring Member</label>
+          <select id="qual-mem-select" class="form-control" required></select>
+        </div>
+        <div class="form-group">
+          <label>Instrument</label>
+          <select id="qual-inst-select" class="form-control" required></select>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <div class="form-group" style="flex: 1;">
+            <label>Certification Level</label>
+            <select id="qual-level-select" class="form-control">
+              <option value="Basic">Basic</option>
+              <option value="Advanced">Advanced</option>
+              <option value="Certified Operator">Certified Operator</option>
+            </select>
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label>Expires Date</label>
+            <input type="date" id="qual-exp-date" class="form-control">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Certified By</label>
+          <input type="text" id="qual-by-input" class="form-control" value="Lab Director">
+        </div>
+        <div class="form-group">
+          <label>Notes / Certification Clearance</label>
+          <input type="text" id="qual-notes-input" class="form-control" placeholder="Passed hands-on safety & calibration test">
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('qualification-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Grant Certification</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let globalInstruments = [];
+    let globalMembers = [];
+    let globalCompanies = [];
+
+    async function fetchJson(url, options = {}) {
+      const res = await fetch(url, options);
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: res.statusText }));
+        throw new Error(err.error || "Request failed");
+      }
+      return res.json();
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll(".nav-tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".tab-pane").forEach(p => p.classList.remove("active"));
+      event.target.classList.add("active");
+      document.getElementById("tab-" + tabId).classList.add("active");
+
+      if (tabId === "dashboard") loadDashboard();
+      if (tabId === "spacebring") loadSpacebringData();
+      if (tabId === "instruments") loadInstruments();
+      if (tabId === "qualifications") loadQualifications();
+      if (tabId === "reservations") loadReservations();
+      if (tabId === "billing") loadBillingSummary();
+    }
+
+    async function loadDashboard() {
+      try {
+        const stats = await fetchJson("/api/stats");
+        document.getElementById("stat-companies").innerText = stats.total_companies;
+        document.getElementById("stat-members").innerText = `${stats.total_active_members} active members`;
+        document.getElementById("stat-instruments").innerText = stats.total_instruments;
+        document.getElementById("stat-quals").innerText = stats.total_qualifications;
+        document.getElementById("stat-unbilled-rev").innerText = `$${stats.unbilled_revenue.toFixed(2)}`;
+        document.getElementById("stat-unbilled-hours").innerText = `${stats.unbilled_hours.toFixed(2)} billable hours`;
+
+        const resList = await fetchJson("/api/reservations");
+        const tbody = document.getElementById("dashboard-reservations-table");
+        if (resList.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color: var(--text-muted);">No reservations found. Click "+ New Booking" or "Load Demo Data".</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = resList.slice(0, 8).map(r => `
+          <tr>
+            <td><strong>${r.instrument_name}</strong><br><span style="font-size:11px; color:var(--text-muted);">${r.instrument_location || ""}</span></td>
+            <td>${r.member_name}</td>
+            <td>${r.company_name || "Unassigned"}</td>
+            <td>${r.start_time.replace("T", " ")}</td>
+            <td>${r.duration_hours.toFixed(1)} hrs</td>
+            <td><span class="badge ${getStatusBadge(r.status)}">${r.status}</span></td>
+            <td><strong>$${r.total_cost.toFixed(2)}</strong></td>
+            <td>
+              ${r.status === 'Scheduled' ? `<button class="btn btn-primary btn-sm" onclick="checkIn('${r.id}')">Check In</button>` : ''}
+              ${r.status === 'Active' ? `<button class="btn btn-success btn-sm" onclick="checkOut('${r.id}')">Check Out</button>` : ''}
+              ${r.status === 'Scheduled' ? `<button class="btn btn-secondary btn-sm" onclick="cancelReservation('${r.id}')">Cancel</button>` : ''}
+            </td>
+          </tr>
+        `).join("");
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function getStatusBadge(status) {
+      if (status === "Completed") return "badge-success";
+      if (status === "Active") return "badge-info";
+      if (status === "Scheduled") return "badge-neutral";
+      if (status === "Cancelled") return "badge-danger";
+      return "badge-neutral";
+    }
+
+    async function loadSpacebringData() {
+      const companies = await fetchJson("/api/companies");
+      const members = await fetchJson("/api/members");
+      globalCompanies = companies;
+      globalMembers = members;
+
+      document.getElementById("spacebring-companies-table").innerHTML = companies.map(c => `
+        <tr>
+          <td><strong>${c.name}</strong></td>
+          <td><span class="badge badge-info">${c.plan_tier}</span></td>
+          <td><span class="badge ${c.status === 'Active' ? 'badge-success' : 'badge-warning'}">${c.status}</span></td>
+          <td>${c.contact_email || "-"}</td>
+          <td>${c.member_count} members</td>
+        </tr>
+      `).join("");
+
+      document.getElementById("spacebring-members-table").innerHTML = members.map(m => `
+        <tr>
+          <td><strong>${m.full_name}</strong></td>
+          <td>${m.company_name || "-"}</td>
+          <td>${m.email || "-"}</td>
+          <td>${m.role}</td>
+          <td><span class="badge ${m.status === 'Active' ? 'badge-success' : 'badge-danger'}">${m.status}</span></td>
+          <td><button class="btn btn-secondary btn-sm" onclick="quickBookForMember('${m.id}')">Book Equipment</button></td>
+        </tr>
+      `).join("");
+    }
+
+    async function loadInstruments() {
+      const insts = await fetchJson("/api/instruments");
+      globalInstruments = insts;
+      document.getElementById("instruments-table").innerHTML = insts.map(i => `
+        <tr>
+          <td><code>${i.id}</code></td>
+          <td><strong>${i.name}</strong><br><span style="font-size:11px; color:var(--text-muted);">${i.model || ''}</span></td>
+          <td>${i.category}</td>
+          <td>${i.location || '-'}</td>
+          <td><strong>$${i.hourly_rate.toFixed(2)}/hr</strong></td>
+          <td>${i.requires_training ? '<span class="badge badge-warning">Required</span>' : '<span class="badge badge-neutral">Open Access</span>'}</td>
+          <td>${i.min_training_level}</td>
+          <td><span class="badge ${i.status === 'Available' ? 'badge-success' : 'badge-danger'}">${i.status}</span></td>
+        </tr>
+      `).join("");
+    }
+
+    async function loadQualifications() {
+      const quals = await fetchJson("/api/qualifications");
+      document.getElementById("qualifications-table").innerHTML = quals.map(q => `
+        <tr>
+          <td><strong>${q.member_name}</strong></td>
+          <td>${q.company_name || "-"}</td>
+          <td>${q.instrument_name}</td>
+          <td><span class="badge badge-success">${q.training_level}</span></td>
+          <td>${q.certified_date || "-"}</td>
+          <td>${q.expires_date || "Never"}</td>
+          <td>${q.certified_by || "-"}</td>
+        </tr>
+      `).join("");
+
+      // Populate verify dropdowns
+      await loadDropdowns();
+    }
+
+    async function loadDropdowns() {
+      if (globalInstruments.length === 0) globalInstruments = await fetchJson("/api/instruments");
+      if (globalMembers.length === 0) globalMembers = await fetchJson("/api/members");
+
+      const memOptions = globalMembers.map(m => `<option value="${m.id}">${m.full_name} (${m.company_name || 'Individual'})</option>`).join("");
+      const instOptions = globalInstruments.map(i => `<option value="${i.id}">${i.name} ($${i.hourly_rate}/hr)</option>`).join("");
+
+      document.getElementById("verify-member-select").innerHTML = memOptions;
+      document.getElementById("verify-instrument-select").innerHTML = instOptions;
+      document.getElementById("modal-inst-select").innerHTML = instOptions;
+      document.getElementById("modal-mem-select").innerHTML = memOptions;
+      document.getElementById("qual-mem-select").innerHTML = memOptions;
+      document.getElementById("qual-inst-select").innerHTML = instOptions;
+    }
+
+    async function verifyEligibility() {
+      const memId = document.getElementById("verify-member-select").value;
+      const instId = document.getElementById("verify-instrument-select").value;
+      const res = await fetchJson("/api/qualifications/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ member_id: memId, instrument_id: instId })
+      });
+
+      const box = document.getElementById("verify-result");
+      box.style.display = "block";
+      if (res.eligible) {
+        box.style.background = "rgba(16, 185, 129, 0.2)";
+        box.style.border = "1px solid var(--accent)";
+        box.style.color = "#6ee7b7";
+        box.innerHTML = `<strong>Eligible to Book:</strong> ${res.reason}`;
+      } else {
+        box.style.background = "rgba(239, 68, 68, 0.2)";
+        box.style.border = "1px solid var(--danger)";
+        box.style.color = "#fca5a5";
+        box.innerHTML = `<strong>Access Denied:</strong> ${res.reason}`;
+      }
+    }
+
+    async function checkModalEligibility() {
+      const instId = document.getElementById("modal-inst-select").value;
+      const memId = document.getElementById("modal-mem-select").value;
+      const hint = document.getElementById("modal-eligibility-hint");
+      if (!instId || !memId) return;
+
+      const res = await fetchJson("/api/qualifications/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ member_id: memId, instrument_id: instId })
+      });
+
+      if (res.eligible) {
+        hint.style.color = "#34d399";
+        hint.innerText = "Certified: " + res.reason;
+      } else {
+        hint.style.color = "#f87171";
+        hint.innerText = "Warning: " + res.reason;
+      }
+    }
+
+    async function loadReservations() {
+      const list = await fetchJson("/api/reservations");
+      document.getElementById("all-reservations-table").innerHTML = list.map(r => `
+        <tr>
+          <td><code>${r.id}</code></td>
+          <td><strong>${r.instrument_name}</strong></td>
+          <td>${r.member_name}</td>
+          <td>${r.company_name || "-"}</td>
+          <td>${r.start_time.replace("T", " ")}</td>
+          <td>${r.end_time.replace("T", " ")}</td>
+          <td>${r.duration_hours.toFixed(2)}</td>
+          <td><strong>$${r.total_cost.toFixed(2)}</strong></td>
+          <td><span class="badge ${getStatusBadge(r.status)}">${r.status}</span></td>
+          <td>${r.billed ? '<span class="badge badge-success">Billed</span>' : '<span class="badge badge-warning">Unbilled</span>'}</td>
+          <td>
+            ${r.status === 'Scheduled' ? `<button class="btn btn-primary btn-sm" onclick="checkIn('${r.id}')">Check In</button>` : ''}
+            ${r.status === 'Active' ? `<button class="btn btn-success btn-sm" onclick="checkOut('${r.id}')">Check Out</button>` : ''}
+            ${r.status === 'Scheduled' ? `<button class="btn btn-secondary btn-sm" onclick="cancelReservation('${r.id}')">Cancel</button>` : ''}
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    async function loadBillingSummary() {
+      const summary = await fetchJson("/api/billing/summary");
+      document.getElementById("billing-summary-table").innerHTML = summary.map(s => `
+        <tr>
+          <td><strong>${s.company_name}</strong></td>
+          <td><span class="badge badge-info">${s.plan_tier || 'N/A'}</span></td>
+          <td>${s.contact_email || '-'}</td>
+          <td>${s.reservation_count} sessions</td>
+          <td>${s.total_instrument_hours.toFixed(2)} hrs</td>
+          <td><strong style="color:var(--accent); font-size:15px;">$${s.total_amount_due.toFixed(2)}</strong></td>
+          <td>
+            <button class="btn btn-secondary btn-sm" onclick="viewCompanyLedger('${s.company_id}')">View Ledger</button>
+            <button class="btn btn-success btn-sm" onclick="exportCompanyCsv('${s.company_id}')">Export CSV</button>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    async function viewCompanyLedger(compId) {
+      const data = await fetchJson(`/api/billing/ledger/${compId}`);
+      document.getElementById("ledger-card").style.display = "block";
+      document.getElementById("ledger-title").innerText = `Itemized Ledger: ${data.company.name} ($${data.total_cost.toFixed(2)} Total)`;
+      document.getElementById("ledger-items-table").innerHTML = data.line_items.map(item => `
+        <tr>
+          <td>${item.start_time.split("T")[0]}</td>
+          <td><strong>${item.instrument_name}</strong></td>
+          <td>${item.member_name}</td>
+          <td>${item.duration_hours.toFixed(2)} hrs</td>
+          <td>$${item.hourly_rate.toFixed(2)}</td>
+          <td><strong>$${item.total_cost.toFixed(2)}</strong></td>
+          <td>${item.notes || '-'}</td>
+        </tr>
+      `).join("");
+    }
+
+    function closeLedger() {
+      document.getElementById("ledger-card").style.display = "none";
+    }
+
+    function exportBillingCsv() {
+      window.location.href = "/api/billing/export-csv";
+    }
+
+    function exportCompanyCsv(compId) {
+      window.location.href = `/api/billing/export-csv?company_id=${compId}`;
+    }
+
+    async function checkIn(id) {
+      await fetchJson(`/api/reservations/${id}/checkin`, { method: "POST" });
+      loadDashboard();
+      loadReservations();
+    }
+
+    async function checkOut(id) {
+      await fetchJson(`/api/reservations/${id}/checkout`, { method: "POST" });
+      loadDashboard();
+      loadReservations();
+      loadBillingSummary();
+    }
+
+    async function cancelReservation(id) {
+      if (!confirm("Are you sure you want to cancel this booking?")) return;
+      await fetchJson(`/api/reservations/${id}/cancel`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason: "User requested cancellation" })
+      });
+      loadDashboard();
+      loadReservations();
+    }
+
+    async function seedSampleData() {
+      if (!confirm("Load sample Spacebring companies, members, and realistic instrument reservations?")) return;
+      const res = await fetchJson("/api/seed-samples", { method: "POST" });
+      alert(res.message);
+      loadDashboard();
+      loadDropdowns();
+    }
+
+    async function importFolder() {
+      const path = document.getElementById("import-folder-input").value.trim();
+      if (!path) return alert("Please enter a valid local folder path.");
+      const box = document.getElementById("import-status-box");
+      box.style.display = "block";
+      box.className = "alert alert-success";
+      box.innerText = "Scanning and importing...";
+      try {
+        const res = await fetchJson("/api/import/folder", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ folder_path: path })
+        });
+        box.innerHTML = `<strong>Success:</strong> Synced ${res.companies_synced} companies and ${res.members_synced} members from ${res.files_scanned} files in folder.`;
+        loadDashboard();
+      } catch (err) {
+        box.className = "alert alert-error";
+        box.innerText = "Import Error: " + err.message;
+      }
+    }
+
+    async function importFile() {
+      const path = document.getElementById("import-file-input").value.trim();
+      if (!path) return alert("Please enter a valid local file path.");
+      const box = document.getElementById("import-status-box");
+      box.style.display = "block";
+      box.className = "alert alert-success";
+      box.innerText = "Ingesting file...";
+      try {
+        const res = await fetchJson("/api/import/file", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ file_path: path })
+        });
+        box.innerHTML = `<strong>Success:</strong> Synced ${res.companies_synced} companies and ${res.members_synced} members.`;
+        loadDashboard();
+      } catch (err) {
+        box.className = "alert alert-error";
+        box.innerText = "Import Error: " + err.message;
+      }
+    }
+
+    function openReservationModal() {
+      loadDropdowns();
+      const now = new Date();
+      now.setMinutes(0, 0, 0);
+      now.setHours(now.getHours() + 1);
+      const end = new Date(now.getTime() + 2 * 3600 * 1000);
+
+      document.getElementById("modal-start-time").value = now.toISOString().slice(0, 16);
+      document.getElementById("modal-end-time").value = end.toISOString().slice(0, 16);
+      document.getElementById("booking-alert").style.display = "none";
+      document.getElementById("reservation-modal").classList.add("active");
+      setTimeout(checkModalEligibility, 100);
+    }
+
+    function quickBookForMember(memId) {
+      openReservationModal();
+      document.getElementById("modal-mem-select").value = memId;
+      checkModalEligibility();
+    }
+
+    function openInstrumentModal() {
+      document.getElementById("instrument-modal").classList.add("active");
+    }
+
+    function openQualificationModal() {
+      loadDropdowns();
+      const nextYear = new Date();
+      nextYear.setFullYear(nextYear.getFullYear() + 1);
+      document.getElementById("qual-exp-date").value = nextYear.toISOString().slice(0, 10);
+      document.getElementById("qualification-modal").classList.add("active");
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove("active");
+    }
+
+    async function handleCreateReservation(e) {
+      e.preventDefault();
+      const alertBox = document.getElementById("booking-alert");
+      alertBox.style.display = "none";
+      const payload = {
+        instrument_id: document.getElementById("modal-inst-select").value,
+        member_id: document.getElementById("modal-mem-select").value,
+        start_time: document.getElementById("modal-start-time").value,
+        end_time: document.getElementById("modal-end-time").value,
+        notes: document.getElementById("modal-booking-notes").value
+      };
+
+      try {
+        await fetchJson("/api/reservations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        closeModal("reservation-modal");
+        loadDashboard();
+        loadReservations();
+      } catch (err) {
+        alertBox.style.display = "block";
+        alertBox.innerText = err.message;
+      }
+    }
+
+    async function handleCreateInstrument(e) {
+      e.preventDefault();
+      const payload = {
+        name: document.getElementById("modal-new-inst-name").value,
+        category: document.getElementById("modal-new-inst-category").value,
+        hourly_rate: parseFloat(document.getElementById("modal-new-inst-rate").value),
+        location: document.getElementById("modal-new-inst-loc").value,
+        min_training_level: document.getElementById("modal-new-inst-training").value,
+        model: document.getElementById("modal-new-inst-model").value,
+        requires_training: document.getElementById("modal-new-inst-training").value !== "None"
+      };
+      await fetchJson("/api/instruments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      closeModal("instrument-modal");
+      loadInstruments();
+      loadDropdowns();
+    }
+
+    async function handleGrantCertification(e) {
+      e.preventDefault();
+      const payload = {
+        member_id: document.getElementById("qual-mem-select").value,
+        instrument_id: document.getElementById("qual-inst-select").value,
+        training_level: document.getElementById("qual-level-select").value,
+        expires_date: document.getElementById("qual-exp-date").value,
+        certified_by: document.getElementById("qual-by-input").value,
+        notes: document.getElementById("qual-notes-input").value
+      };
+      await fetchJson("/api/qualifications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      closeModal("qualification-modal");
+      loadQualifications();
+    }
+
+    // Initial load
+    window.onload = () => {
+      loadDashboard();
+      loadDropdowns();
+    };
+  </script>
+</body>
+</html>

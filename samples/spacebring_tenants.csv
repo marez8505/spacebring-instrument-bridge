@@ -1,0 +1,6 @@
+company_id,company_name,plan_tier,status,contact_email
+comp-lumina-bio,Lumina Biosciences,Dedicated Lab Suite 3A,Active,finance@luminabio.com
+comp-axon-therapeutics,Axon Therapeutics,Private Bench B1,Active,billing@axonrx.com
+comp-solaris-genomics,Solaris Genomics,Coworking Flex + Core Lab,Active,accounts@solarisgen.com
+comp-apex-biomaterials,Apex Biomaterials,Dedicated Lab Suite 2C,Active,admin@apexbiomat.org
+comp-nano-vector,NanoVector Labs,Dedicated Bench C4,Past Due,accounting@nanovector.io
